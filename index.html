@@ -420,7 +420,6 @@ let SB_KEY = localStorage.getItem('ain_sb_key') || '';
 let D = [];
 let tipo = 'Estándar';
 let dashCharts = {};
-let dashPeriod2 = 'semana';
 
 const hoy = () => new Date().toISOString().split('T')[0];
 const fmt = f => { if(!f) return '—'; const [y,m,d] = f.split('-'); return `${d}/${m}/${y}`; };
@@ -436,13 +435,6 @@ document.getElementById('fecha').value = hoy();
     opt.value = opt.textContent = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
     sel.appendChild(opt);
   }
-})();
-
-// KPI default dates (last 30 days)
-(function(){
-  const a = new Date(); a.setDate(a.getDate()-30);
-  document.getElementById('kd').value = a.toISOString().split('T')[0];
-  document.getElementById('kh').value = hoy();
 })();
 
 if(SB_URL && SB_KEY){ initConectado(); cargarDatos(); }
