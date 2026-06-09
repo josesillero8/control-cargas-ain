@@ -212,7 +212,7 @@ tbody td{padding:10px 14px;color:var(--text);white-space:nowrap;vertical-align:m
   </div>
 
   <!-- CONFIG BANNER -->
-  <div id="cfg-banner" class="cfg-banner" style="display:none">
+  <div id="cfg-banner" class="cfg-banner">
     <i class="ti ti-alert-circle" style="font-size:20px;color:var(--amber);flex-shrink:0;margin-top:1px"></i>
     <div style="flex:1">
       <p style="font-size:13px;color:#78350F;font-weight:500;margin-bottom:4px">Configura la conexión con Supabase</p>
@@ -446,6 +446,18 @@ function showBanner(){
   setConn('err','Sin configurar');
 }
 
+function initConectado(){
+  document.getElementById('cfg-banner').style.display = 'none';
+  document.getElementById('cfg-ok').style.display = 'flex';
+  setConn('loading','Cargando...');
+}
+
+// Inicializar según si hay credenciales guardadas
+window.addEventListener('DOMContentLoaded', function(){
+  if(SB_URL && SB_KEY){ initConectado(); cargarDatos(); }
+  else { showBanner(); }
+});
+
 function guardarConfig(){
   const u = document.getElementById('sb-url').value.trim();
   const k = document.getElementById('sb-key').value.trim();
@@ -462,12 +474,6 @@ function resetConfig(){
   localStorage.removeItem('ain_sb_url');
   localStorage.removeItem('ain_sb_key');
   showBanner();
-}
-
-function initConectado(){
-  document.getElementById('cfg-banner').style.display = 'none';
-  document.getElementById('cfg-ok').style.display = 'flex';
-  setConn('loading','Cargando...');
 }
 
 function setConn(state, txt){
