@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Cargas · Aurora Intelligent Nutrition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FFFFFF;--bg2:#FAFAFA;--bg3:#F4F4F5;--bg4:#E4E4E7;
+  --text:#0F0F10;--text2:#6B6B72;--text3:#A1A1AA;
+  --border:#E4E4E7;--border2:#D4D4D8;
+  --orange:#E8793A;--orange-dark:#C4601C;--orange-bg:#FEF3EC;--orange-text:#9A3A0A;--orange-border:#F9C8A4;
+  --green:#15803D;--green-bg:#F0FDF4;--green-light:#BBF7D0;
+  --red:#B91C1C;--red-bg:#FEF2F2;
+  --amber:#92400E;--amber-bg:#FFFBEB;--amber-light:#FDE68A;
+  --blue:#1D4ED8;--blue-bg:#EFF6FF;
+  --teal:#0F766E;--teal-bg:#F0FDFA;
+}
+body{font-family:'Geist',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+.app{max-width:1300px;margin:0 auto;padding:0 32px 60px}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0 18px;border-bottom:1px solid var(--border);margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:40px;height:40px;border-radius:10px;background:var(--orange);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-name{font-size:16px;font-weight:500;color:var(--text);letter-spacing:-0.4px}
+.brand-sub{font-size:11px;color:var(--text2);margin-top:2px;letter-spacing:0.01em}
+.conn-badge{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);padding:6px 12px;border-radius:20px;border:1px solid var(--border)}
+.cdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cdot.ok{background:#22C55E}
+.cdot.err{background:#EF4444}
+.cdot.loading{background:#F59E0B}
+
+/* NAV */
+.nav{display:flex;gap:6px;margin-bottom:28px;background:var(--bg3);border-radius:14px;padding:5px;align-items:center}
+.ntab{background:none;border:none;padding:9px 14px;font-family:'Geist',system-ui,sans-serif;font-size:13px;font-weight:400;color:var(--text2);cursor:pointer;border-radius:10px;white-space:nowrap;letter-spacing:-0.1px;transition:all 0.15s;display:flex;align-items:center;gap:6px;flex:1;justify-content:center}
+.ntab.on{background:var(--bg);color:var(--text);font-weight:500;border:1px solid var(--border)}
+.ntab:hover:not(.on){background:var(--bg4);color:var(--text)}
+.nav-refresh{margin-left:auto;flex:0 0 auto;padding:9px 12px;background:none;border:none;border-radius:10px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Geist',system-ui,sans-serif;font-size:12px;transition:all 0.15s}
+.nav-refresh:hover{background:var(--bg4);color:var(--orange)}
+.nav-refresh.spin i{animation:spin 0.7s linear infinite}
+.panel{display:none}.panel.active{display:block}
+
+/* CONFIG */
+.cfg-banner{background:var(--amber-bg);border:1px solid var(--amber-light);border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:flex-start;gap:12px}
+.cfg-ok{background:var(--green-bg);border:1px solid var(--green-light);border-radius:12px;padding:12px 18px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between}
+.cfg-ok span{font-size:13px;color:var(--green);display:flex;align-items:center;gap:8px}
+.cfg-ok a{font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline}
+.cfg-input{font-family:'Geist',system-ui,sans-serif;font-size:13px;padding:8px 10px;border:1px solid var(--amber-light);border-radius:8px;background:white;color:var(--text);flex:1}
+.cfg-btn{padding:8px 16px;background:var(--orange);border:none;border-radius:8px;color:white;font-family:'Geist',system-ui,sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.cfg-btn:hover{background:var(--orange-dark)}
+
+/* SPINNER */
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row{display:flex;align-items:center;gap:10px;padding:48px;justify-content:center;color:var(--text2);font-size:13px}
+
+/* FORM */
+.sec{margin-bottom:28px}
+.sec-title{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.fg.full{grid-column:1/-1}
+.flabel{font-size:11px;color:var(--text2);margin-bottom:6px;letter-spacing:0.02em}
+input[type=text],input[type=date],input[type=number],select{font-family:'Geist',system-ui,sans-serif;font-size:14px;padding:10px 0;border:none;border-bottom:1px solid var(--border2);border-radius:0;background:transparent;color:var(--text);width:100%;letter-spacing:-0.1px;transition:border-color 0.15s;-webkit-appearance:none}
+input::placeholder{color:var(--text3);font-weight:300}
+input:focus,select:focus{outline:none;border-bottom:2px solid var(--orange);margin-bottom:-1px}
+select{cursor:pointer}
+select option{background:var(--bg)}
+.tipo-row{display:flex;gap:12px}
+.tbtn{flex:1;padding:14px 8px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--text2);font-family:'Geist',system-ui,sans-serif;font-size:13px;cursor:pointer;text-align:center;letter-spacing:-0.1px;transition:all 0.15s}
+.tbtn:hover{border-color:var(--border2);color:var(--text)}
+.tbtn i{display:block;font-size:22px;margin:0 auto 6px}
+.tbtn.ts{border-color:var(--orange);background:var(--orange-bg);color:var(--orange-text);font-weight:500}
+.tbtn.tr{border-color:#059669;background:var(--teal-bg);color:var(--teal);font-weight:500}
+.tbtn.tp{border-color:#2563EB;background:var(--blue-bg);color:var(--blue);font-weight:500}
+.savebtn{width:100%;margin-top:24px;padding:13px;background:var(--orange);border:none;border-radius:12px;color:white;font-family:'Geist',system-ui,sans-serif;font-size:14px;font-weight:500;cursor:pointer;letter-spacing:-0.2px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s}
+.savebtn:hover{background:var(--orange-dark)}
+.savebtn:disabled{background:var(--text3);cursor:not-allowed}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:10px;margin-bottom:20px;align-items:flex-end;flex-wrap:wrap}
+.filter-bar>div{display:flex;flex-direction:column;gap:5px;flex:1;min-width:120px}
+.filter-bar>div:first-child{flex:2}
+.filter-bar input,.filter-bar select{font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);border-bottom:1px solid var(--border);margin-bottom:0}
+.filter-bar input:focus,.filter-bar select:focus{border:1px solid var(--orange);outline:none;margin-bottom:0}
+.ibtn{padding:9px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:'Geist',system-ui,sans-serif;font-size:13px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;align-self:flex-end;letter-spacing:-0.1px;transition:all 0.15s}
+.ibtn:hover{border-color:var(--border2);color:var(--text)}
+.ibtn.primary{background:var(--orange);color:white;border-color:var(--orange)}
+.ibtn.primary:hover{background:var(--orange-dark)}
+
+/* TABLES */
+.tbl-wrap{border:1px solid var(--border);border-radius:12px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-family:'Geist',system-ui,sans-serif;font-size:12px;table-layout:auto}
+thead th{padding:11px 14px;font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em;background:var(--bg2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg2)}
+tbody td{padding:10px 14px;color:var(--text);white-space:nowrap;vertical-align:middle;letter-spacing:-0.1px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;font-family:'Geist',system-ui,sans-serif;font-size:11px;font-weight:500;padding:3px 9px;border-radius:5px;letter-spacing:-0.1px}
+.b-std{background:var(--orange-bg);color:var(--orange-text)}
+.b-ref{background:var(--teal-bg);color:var(--teal)}
+.b-pha{background:var(--blue-bg);color:var(--blue)}
+
+/* INLINE INPUTS */
+.ssel,.pinp,.dinp{font-family:'Geist',system-ui,sans-serif;font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);letter-spacing:-0.1px}
+.pinp{width:130px}
+.dinp{width:110px}
+.pinp:placeholder-shown,.dinp.empty{border-color:#FCA5A5}
+.pinp:focus,.dinp:focus,.ssel:focus{outline:none;border-color:var(--orange)}
+
+/* EMPTY */
+.empty{text-align:center;padding:56px 16px;color:var(--text2);font-size:13px}
+.empty i{font-size:32px;display:block;margin-bottom:10px;opacity:0.3}
+
+/* PLAN */
+.plan-top{display:flex;gap:10px;margin-bottom:20px;align-items:flex-end;flex-wrap:wrap}
+.plan-top>div{display:flex;flex-direction:column;gap:5px;flex:1;min-width:110px}
+.plan-top input,.plan-top select{font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);border-bottom:1px solid var(--border);color:var(--text);margin-bottom:0}
+.plan-top input:focus,.plan-top select:focus{border:1px solid var(--orange);outline:none;margin-bottom:0}
+
+.plan-heading{margin-bottom:16px;padding:14px 18px;background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:10px;display:flex;align-items:center;gap:10px}
+.plan-heading-title{font-size:15px;font-weight:500;color:var(--orange-text);letter-spacing:-0.3px}
+.plan-heading-sub{font-size:12px;color:var(--orange-dark);margin-top:2px}
+
+.day-block{border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.day-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--bg2);cursor:pointer;user-select:none}
+.day-hdr-l{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.day-name{font-size:14px;font-weight:500;color:var(--text);letter-spacing:-0.3px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:500;padding:3px 9px;border-radius:5px}
+.p-n{background:var(--orange-bg);color:var(--orange-text)}
+.p-a{background:var(--amber-bg);color:var(--amber)}
+.p-r{background:var(--red-bg);color:var(--red)}
+.p-t{background:var(--orange);color:white}
+.p-ok{background:var(--green-bg);color:var(--green)}
+.chevron{transition:transform 0.2s;font-size:15px;color:var(--text2)}
+.day-block.col .chevron{transform:rotate(-90deg)}
+.day-block.col .day-body{display:none}
+
+/* KPI / ANALYSIS */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px}
+.kpi{border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.kpi-accent{border-color:var(--orange-border);background:var(--orange-bg)}
+.kpi-l{font-size:10px;color:var(--text2);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px;font-weight:500}
+.kpi-n{font-size:26px;font-weight:500;letter-spacing:-1px;line-height:1;color:var(--text)}
+.kpi-sub{font-size:11px;margin-top:5px;color:var(--text2)}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart-card{border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:13px;font-weight:500;color:var(--text);letter-spacing:-0.2px;margin-bottom:3px}
+.chart-sub{font-size:11px;color:var(--text2);margin-bottom:14px}
+.clegend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+.cleg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.cleg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.rank-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.rank-row:last-child{border-bottom:none}
+.rank-name{font-size:12px;color:var(--text);flex:0 0 110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-bar-wrap{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.rank-bar{height:100%;border-radius:3px}
+.rank-val{font-size:12px;font-weight:500;color:var(--text);flex:0 0 32px;text-align:right}
+.rank-badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;flex:0 0 auto}
+
+/* DASHBOARD */
+.dash-period-btn{background:none;border:none;padding:6px 11px;font-family:'Geist',system-ui,sans-serif;font-size:12px;color:var(--text2);cursor:pointer;border-radius:7px;transition:all 0.15s;white-space:nowrap}
+.dash-period-btn.on{background:var(--bg);color:var(--orange);font-weight:500;border:1px solid var(--orange-border)}
+.dash-period-btn:hover:not(.on){background:var(--bg4);color:var(--text)}
+.dash-alert{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:6px}
+.dash-trans-card{border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.dash-trans-card-name{font-size:11px;font-weight:500;margin-bottom:8px;letter-spacing:0.02em}
+.dash-trans-card-stat{font-size:22px;font-weight:500;letter-spacing:-0.8px;line-height:1}
+.dash-trans-card-sub{font-size:11px;color:var(--text2);margin-top:3px}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.res-sec{border:1px solid var(--border);border-radius:12px;padding:20px 22px}
+.res-sec-title{font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:18px}
+.bar-track{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:6px}
+.bar-fill{height:100%;border-radius:2px}
+
+/* DEL BTN */
+.delbtn{background:none;border:none;cursor:pointer;color:var(--text2);padding:4px 6px;border-radius:6px;font-size:14px;transition:all 0.15s}
+.delbtn:hover{color:var(--red);background:var(--red-bg)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:10px;font-family:'Geist',system-ui,sans-serif;font-size:13px;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;z-index:9999;color:white;letter-spacing:-0.1px}
+.toast.show{opacity:1}
+.toast.ok{background:#1E1B4B}
+.toast.err{background:#991B1B}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-icon"><i class="ti ti-truck" style="font-size:20px;color:white"></i></div>
+      <div>
+        <div class="brand-name">Control de cargas · AIN</div>
+        <div class="brand-sub">Aurora Intelligent Nutrition · Estepa</div>
+      </div>
+    </div>
+    <div class="conn-badge">
+      <div class="cdot loading" id="cdot"></div>
+      <span id="conn-txt">Conectando...</span>
+    </div>
+  </div>
+
+  <!-- CONFIG BANNER -->
+  <div id="cfg-banner" class="cfg-banner" style="display:none">
+    <i class="ti ti-alert-circle" style="font-size:20px;color:var(--amber);flex-shrink:0;margin-top:1px"></i>
+    <div style="flex:1">
+      <p style="font-size:13px;color:#78350F;font-weight:500;margin-bottom:4px">Configura la conexión con Supabase</p>
+      <p style="font-size:12px;color:#92400E;line-height:1.6">Pega aquí la URL y clave anónima de tu proyecto Supabase. Sigue las instrucciones del archivo <strong>INSTRUCCIONES_SUPABASE.txt</strong>.</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <input class="cfg-input" id="sb-url" placeholder="https://xxxx.supabase.co" style="flex:2;min-width:200px"/>
+        <input class="cfg-input" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5c..." style="flex:3;min-width:200px"/>
+        <button class="cfg-btn" onclick="guardarConfig()">Guardar y conectar</button>
+      </div>
+    </div>
+  </div>
+  <div id="cfg-ok" class="cfg-ok" style="display:none">
+    <span><i class="ti ti-circle-check" style="font-size:17px"></i>Conectado a Supabase · datos compartidos en tiempo real</span>
+    <a onclick="resetConfig()">Cambiar configuración</a>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <button class="ntab on" onclick="sw('nueva')"><i class="ti ti-plus" style="font-size:13px"></i>Nueva carga</button>
+    <button class="ntab" onclick="sw('plan')"><i class="ti ti-calendar" style="font-size:13px"></i>Planificación</button>
+    <button class="ntab" onclick="sw('hist')"><i class="ti ti-history" style="font-size:13px"></i>Historial</button>
+    <button class="ntab" onclick="sw('dash')"><i class="ti ti-layout-dashboard" style="font-size:13px"></i>Dashboard</button>
+    <button class="ntab" onclick="sw('res')"><i class="ti ti-chart-pie" style="font-size:13px"></i>Resumen</button>
+    <button class="nav-refresh" id="refresh-btn" onclick="refreshBtn()" title="Actualizar datos"><i class="ti ti-refresh" style="font-size:16px"></i>Actualizar</button>
+  </div>
+
+  <!-- NUEVA CARGA -->
+  <div id="p-nueva" class="panel active">
+    <div class="sec">
+      <div class="sec-title">Operación</div>
+      <div class="fgrid">
+        <div class="fg"><div class="flabel">Empresa cargadora</div>
+          <select id="empresa">
+            <option value="">-- Seleccionar --</option>
+            <option>MORENO</option>
+            <option>DMI</option>
+            <option>NUTRIEXPERIENCE</option>
+          </select>
+        </div>
+        <div class="fg"><div class="flabel">Transportista</div>
+          <select id="transportista">
+            <option value="">-- Seleccionar --</option>
+            <option>STEF</option>
+            <option>CARRERAS</option>
+            <option>REDUR</option>
+            <option>SCHENKER</option>
+            <option>DSV</option>
+            <option>RHENUS</option>
+            <option>DHL</option>
+            <option>SUS MEDIOS</option>
+          </select>
+        </div>
+        <div class="fg"><div class="flabel">Cliente</div><input type="text" id="cliente" placeholder="Nombre del cliente" oninput="this.value=this.value.toUpperCase()"/></div>
+        <div class="fg"><div class="flabel">Nº de albarán</div><input type="text" id="albaran" placeholder="ALB-2024-001" oninput="this.value=this.value.toUpperCase()"/></div>
+        <div class="fg"><div class="flabel">Fecha de carga</div><input type="date" id="fecha_carga"/></div>
+        <div class="fg"><div class="flabel">Fecha de entrega <span style="font-size:10px;color:var(--text3)">(opcional)</span></div><input type="date" id="fecha"/></div>
+        <div class="fg"><div class="flabel">Hora de entrega <span style="font-size:10px;color:var(--text3)">(opcional)</span></div><select id="hora"><option value="">-- Seleccionar --</option></select></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-title">Destino</div>
+      <div class="fgrid">
+        <div class="fg"><div class="flabel">Código postal</div><input type="text" id="cp" placeholder="50001" maxlength="5" oninput="buscarCP(this.value)"/></div>
+        <div class="fg"><div class="flabel">Nº de palets</div><input type="number" id="palets" placeholder="0" min="1"/></div>
+        <div class="fg"><div class="flabel">Localidad <span id="loc-spinner" style="display:none;font-size:10px;color:var(--orange)">buscando...</span></div><input type="text" id="localidad" placeholder="Se rellena con el CP" oninput="this.value=this.value.toUpperCase()"/></div>
+        <div class="fg"><div class="flabel">Provincia</div><input type="text" id="provincia" placeholder="Se rellena con el CP" oninput="this.value=this.value.toUpperCase()"/></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-title">Tipo de carga</div>
+      <div class="tipo-row">
+        <button class="tbtn ts" onclick="selT(this,'Estándar')"><i class="ti ti-box"></i>Estándar</button>
+        <button class="tbtn" onclick="selT(this,'Refrigerada')"><i class="ti ti-snowflake"></i>Refrigerada</button>
+        <button class="tbtn" onclick="selT(this,'Pharma')"><i class="ti ti-pill"></i>Pharma</button>
+      </div>
+      <button class="savebtn" id="savebtn" onclick="guardar()"><i class="ti ti-device-floppy"></i>Registrar carga</button>
+    </div>
+  </div>
+
+  <!-- PLANIFICACIÓN -->
+  <div id="p-plan" class="panel">
+    <div class="plan-top">
+      <div><div class="flabel">Desde (fecha carga)</div><input type="date" id="pd" onchange="rPlan()"/></div>
+      <div><div class="flabel">Hasta (fecha carga)</div><input type="date" id="ph" onchange="rPlan()"/></div>
+      <div><div class="flabel">Transportista</div><select id="pt" onchange="rPlan()"><option value="">Todos</option></select></div>
+      <button class="ibtn" onclick="cargarDatos(true)"><i class="ti ti-refresh"></i>Actualizar</button>
+      <button class="ibtn primary" onclick="envMail()"><i class="ti ti-mail"></i>Enviar email</button>
+    </div>
+    <div id="plan-heading" class="plan-heading" style="display:none">
+      <i class="ti ti-truck" style="font-size:18px;color:var(--orange-dark)"></i>
+      <div>
+        <div class="plan-heading-title" id="plan-title">PREVISIÓN DE CARGAS</div>
+        <div class="plan-heading-sub" id="plan-sub"></div>
+      </div>
+    </div>
+    <div id="plan-cont"></div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div id="p-hist" class="panel">
+    <div class="filter-bar">
+      <div><div class="flabel">Buscar</div><input type="text" id="q" placeholder="Empresa, cliente, albarán, transportista..." oninput="rHist()"/></div>
+      <div><div class="flabel">Tipo</div><select id="ft" onchange="rHist()"><option value="">Todos</option><option>Estándar</option><option>Refrigerada</option><option>Pharma</option></select></div>
+      <div><div class="flabel">Estado</div><select id="fe" onchange="rHist()"><option value="">Todos</option><option>Pdte. carga</option><option>Cargado</option><option>Entregado</option></select></div>
+      <button class="ibtn" onclick="cargarDatos(true)"><i class="ti ti-refresh"></i>Actualizar</button>
+      <button class="ibtn" onclick="xcsv()"><i class="ti ti-download"></i>CSV</button>
+    </div>
+    <div id="hist-cont"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="p-dash" class="panel">
+
+    <!-- BLOQUE SUPERIOR: Estado actual hoy -->
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--text);letter-spacing:-0.2px">Estado operativo · hoy</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px" id="dash-fecha"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);background:var(--green-bg);border:1px solid var(--green-light);padding:5px 12px;border-radius:20px">
+          <div class="cdot ok"></div><span id="dash-ultima-act">—</span>
+        </div>
+      </div>
+      <div class="kpi-row" id="dash-kpis-hoy"></div>
+      <div id="dash-trans-hoy" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px"></div>
+      <div id="dash-alertas" style="margin-top:12px"></div>
+    </div>
+
+    <!-- DIVISOR -->
+    <div style="border-top:1px solid var(--border);margin-bottom:24px;padding-top:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+        <div style="font-size:13px;font-weight:500;color:var(--text);letter-spacing:-0.2px">Evolución histórica</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <div style="display:flex;gap:4px;background:var(--bg3);border-radius:10px;padding:4px">
+            <button class="dash-period-btn on" onclick="setPeriod('hoy',this)">Hoy</button>
+            <button class="dash-period-btn" onclick="setPeriod('ayer',this)">Ayer</button>
+            <button class="dash-period-btn" onclick="setPeriod('semana',this)">Esta semana</button>
+            <button class="dash-period-btn" onclick="setPeriod('semana_ant',this)">Sem. anterior</button>
+            <button class="dash-period-btn" onclick="setPeriod('mes',this)">Este mes</button>
+            <button class="dash-period-btn" onclick="setPeriod('mes_ant',this)">Mes anterior</button>
+            <button class="dash-period-btn" onclick="setPeriod('anyo',this)">Este año</button>
+            <button class="dash-period-btn" onclick="setPeriod('libre',this)">Libre</button>
+          </div>
+          <div id="dash-range-libre" style="display:none;gap:6px;align-items:center;display:flex">
+            <input type="date" id="dash-desde" onchange="rDash()" style="font-size:12px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);border-bottom:1px solid var(--border);margin-bottom:0"/>
+            <span style="font-size:12px;color:var(--text2)">—</span>
+            <input type="date" id="dash-hasta" onchange="rDash()" style="font-size:12px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);border-bottom:1px solid var(--border);margin-bottom:0"/>
+          </div>
+          <select id="dash-trans-fil" onchange="rDash()" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);border-bottom:1px solid var(--border);margin-bottom:0">
+            <option value="">Todos los transportistas</option>
+          </select>
+        </div>
+      </div>
+      <div class="kpi-row" id="dash-kpis-hist" style="grid-template-columns:repeat(5,1fr)"></div>
+      <div class="charts-grid" style="margin-top:14px">
+        <div class="chart-card full">
+          <div class="chart-title">Cargas y palets por día</div>
+          <div class="chart-sub" id="dash-evol-sub">Evolución del periodo seleccionado</div>
+          <div class="clegend">
+            <span class="cleg"><span class="cleg-sq" style="background:#E8793A"></span>Cargas</span>
+            <span class="cleg"><span class="cleg-sq" style="background:#F9C8A4"></span>Palets</span>
+          </div>
+          <div style="position:relative;width:100%;height:200px"><canvas id="dash-c-evol" role="img" aria-label="Evolución diaria">Gráfica.</canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Volumen por transportista</div>
+          <div class="chart-sub">Cargas y palets en el periodo</div>
+          <div id="dash-rank-trans"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Estado de cargas</div>
+          <div class="chart-sub">Distribución por estado</div>
+          <div class="clegend" id="dash-estado-legend"></div>
+          <div style="position:relative;width:100%;height:160px"><canvas id="dash-c-estado" role="img" aria-label="Estado de cargas">Donut.</canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Distribución por tipo</div>
+          <div class="chart-sub">Estándar · Refrigerada · Pharma</div>
+          <div class="clegend" id="dash-tipo-legend"></div>
+          <div style="position:relative;width:100%;height:160px"><canvas id="dash-c-tipo" role="img" aria-label="Tipos de carga">Donut.</canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Top provincias destino</div>
+          <div class="chart-sub">Por volumen de cargas</div>
+          <div id="dash-rank-prov"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div id="p-res" class="panel">
+    <div class="kpi-row" id="res-kpis"></div>
+    <div class="res-grid" id="res-det"></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────
+let SB_URL = localStorage.getItem('ain_sb_url') || '';
+let SB_KEY = localStorage.getItem('ain_sb_key') || '';
+let D = [];
+let tipo = 'Estándar';
+let dashCharts = {};
+let dashPeriod2 = 'semana';
+
+const hoy = () => new Date().toISOString().split('T')[0];
+const fmt = f => { if(!f) return '—'; const [y,m,d] = f.split('-'); return `${d}/${m}/${y}`; };
+const dsem = f => ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][new Date(f+'T12:00:00').getDay()];
+
+// ── INIT ───────────────────────────────────────────────────
+document.getElementById('fecha_carga').value = hoy();
+document.getElementById('fecha').value = hoy();
+(function(){
+  const sel = document.getElementById('hora');
+  for(let h=0;h<24;h++) for(let m=0;m<60;m+=15){
+    const opt = document.createElement('option');
+    opt.value = opt.textContent = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+    sel.appendChild(opt);
+  }
+})();
+
+// KPI default dates (last 30 days)
+(function(){
+  const a = new Date(); a.setDate(a.getDate()-30);
+  document.getElementById('kd').value = a.toISOString().split('T')[0];
+  document.getElementById('kh').value = hoy();
+})();
+
+if(SB_URL && SB_KEY){ initConectado(); cargarDatos(); }
+else { showBanner(); }
+
+function showBanner(){
+  document.getElementById('cfg-banner').style.display = 'flex';
+  document.getElementById('cfg-ok').style.display = 'none';
+  setConn('err','Sin configurar');
+}
+
+function guardarConfig(){
+  const u = document.getElementById('sb-url').value.trim();
+  const k = document.getElementById('sb-key').value.trim();
+  if(!u.includes('supabase.co') || k.length < 20){ toast('URL o clave no válidas',true); return; }
+  SB_URL = u; SB_KEY = k;
+  localStorage.setItem('ain_sb_url', u);
+  localStorage.setItem('ain_sb_key', k);
+  initConectado();
+  cargarDatos();
+}
+
+function resetConfig(){
+  SB_URL=''; SB_KEY='';
+  localStorage.removeItem('ain_sb_url');
+  localStorage.removeItem('ain_sb_key');
+  showBanner();
+}
+
+function initConectado(){
+  document.getElementById('cfg-banner').style.display = 'none';
+  document.getElementById('cfg-ok').style.display = 'flex';
+  setConn('loading','Cargando...');
+}
+
+function setConn(state, txt){
+  const dot = document.getElementById('cdot');
+  dot.className = 'cdot ' + state;
+  document.getElementById('conn-txt').textContent = txt;
+}
+
+// ── API SUPABASE ───────────────────────────────────────────
+async function sbFetch(path, opts={}){
+  const headers = {
+    'Content-Type': 'application/json',
+    'Prefer': opts.prefer||'return=representation',
+    ...opts.headers
+  };
+  if(SB_KEY.startsWith('sb_publishable_')){
+    headers['Authorization'] = 'Bearer ' + SB_KEY;
+    headers['apikey'] = SB_KEY;
+  } else {
+    headers['apikey'] = SB_KEY;
+    headers['Authorization'] = 'Bearer ' + SB_KEY;
+  }
+  const res = await fetch(SB_URL + '/rest/v1/' + path, {
+    headers,
+    method: opts.method||'GET',
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  if(!res.ok){ const e = await res.text(); throw new Error(e); }
+  if(res.status === 204) return null;
+  return res.json();
+}
+
+async function cargarDatos(silent=false){
+  if(!SB_URL) return;
+  if(!silent) setConn('loading','Cargando...');
+  try{
+    const data = await sbFetch('cargas?order=created_at.desc&limit=2000');
+    D = data || [];
+    const n = D.filter(c=>c.fecha_carga===hoy()).length;
+    setConn('ok', D.length+' cargas · '+n+' hoy · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}));
+    reRender();
+  }catch(e){
+    setConn('err','Error: '+e.message);
+    toast('Error al cargar datos',true);
+  }
+}
+
+function reRender(){
+  const tab = [...document.querySelectorAll('.ntab')].findIndex(b=>b.classList.contains('on'));
+  const tabs = ['nueva','plan','hist','dash','res'];
+  if(tabs[tab]==='plan'){ iPlan(); rPlan(); }
+  if(tabs[tab]==='hist') rHist();
+  if(tabs[tab]==='dash'){ iDash(); }
+  if(tabs[tab]==='res') rRes();
+}
+
+// ── NAVEGACIÓN ─────────────────────────────────────────────
+function sw(tab){
+  const tabs=['nueva','plan','hist','dash','res'];
+  document.querySelectorAll('.ntab').forEach((b,i)=>b.classList.toggle('on',tabs[i]===tab));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p-'+tab).classList.add('active');
+  if(tab==='plan'){ iPlan(); rPlan(); }
+  if(tab==='hist') rHist();
+  if(tab==='dash'){ iDash(); }
+  if(tab==='res') rRes();
+}
+
+// ── TIPO ───────────────────────────────────────────────────
+function selT(btn, t){
+  tipo = t;
+  document.querySelectorAll('.tbtn').forEach(b=>b.className='tbtn');
+  btn.classList.add(t==='Estándar'?'ts':t==='Refrigerada'?'tr':'tp');
+}
+
+// ── GUARDAR CARGA ──────────────────────────────────────────
+async function guardar(){
+  if(!SB_URL){ toast('Configura Supabase primero',true); return; }
+  const obligatorios=['empresa','transportista','cliente','albaran','fecha_carga','localidad','provincia','cp','palets'];
+  const opcionales=['fecha','hora'];
+  const v={};
+  for(const k of obligatorios){
+    v[k]=document.getElementById(k).value.trim();
+    if(!v[k]){ toast('Completa todos los campos obligatorios',true); return; }
+  }
+  for(const k of opcionales){ v[k]=document.getElementById(k).value.trim(); }
+  const btn=document.getElementById('savebtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>Guardando...';
+  try{
+    const carga = {...v, palets:parseInt(v.palets), tipo, estado:'Pdte. carga', preparador:''};
+    const res = await sbFetch('cargas', {method:'POST', body:carga});
+    D.unshift(res[0]||carga);
+    [...obligatorios,...opcionales].forEach(k=>document.getElementById(k).value='');
+    document.getElementById('fecha_carga').value=hoy();
+    toast('Carga registrada correctamente');
+    setConn('ok', D.length+' cargas · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){ toast('Error al guardar: '+e.message,true); }
+  btn.disabled=false;
+  btn.innerHTML='<i class="ti ti-device-floppy"></i>Registrar carga';
+}
+
+// ── BOTÓN ACTUALIZAR GLOBAL ────────────────────────────────
+async function refreshBtn(){
+  const btn=document.getElementById('refresh-btn');
+  btn.classList.add('spin');
+  await cargarDatos(false);
+  btn.classList.remove('spin');
+}
+
+// ── UPDATE INLINE ──────────────────────────────────────────
+async function updField(id, field, val){
+  const c=D.find(x=>String(x.id)===String(id));
+  if(!c) return;
+  c[field]=val;
+  try{ await sbFetch('cargas?id=eq.'+id,{method:'PATCH',body:{[field]:val},prefer:'return=minimal',headers:{'Prefer':'return=minimal'}}); }
+  catch(e){ toast('Error al actualizar',true); }
+}
+
+// ── BADGES ─────────────────────────────────────────────────
+function tbadge(t){
+  if(t==='Refrigerada') return `<span class="badge b-ref"><i class="ti ti-snowflake" style="font-size:10px"></i>${t}</span>`;
+  if(t==='Pharma') return `<span class="badge b-pha"><i class="ti ti-pill" style="font-size:10px"></i>${t}</span>`;
+  return `<span class="badge b-std"><i class="ti ti-box" style="font-size:10px"></i>${t}</span>`;
+}
+function estadoColor(e){
+  if(e==='Entregado') return 'background:#F0FDF4;color:#15803D';
+  if(e==='Cargado') return 'background:#EFF6FF;color:#1D4ED8';
+  return 'background:#FFFBEB;color:#92400E';
+}
+
+// ── PLANIFICACIÓN ──────────────────────────────────────────
+function iPlan(){
+  const ts=[...new Set(D.map(c=>c.transportista))].sort();
+  const sel=document.getElementById('pt'); const cur=sel.value;
+  sel.innerHTML='<option value="">Todos</option>'+ts.map(t=>`<option${t===cur?' selected':''}>${t}</option>`).join('');
+  if(!document.getElementById('pd').value){
+    const a=new Date(); a.setDate(a.getDate()-2);
+    document.getElementById('pd').value=a.toISOString().split('T')[0];
+    const b=new Date(); b.setDate(b.getDate()+7);
+    document.getElementById('ph').value=b.toISOString().split('T')[0];
+  }
+}
+
+function rPlan(){
+  const desde=document.getElementById('pd').value;
+  const hasta=document.getElementById('ph').value;
+  const tr=document.getElementById('pt').value;
+  const fil=D.filter(c=>(!desde||c.fecha_carga>=desde)&&(!hasta||c.fecha_carga<=hasta)&&(!tr||c.transportista===tr));
+  const map={};
+  fil.forEach(c=>{const k=c.fecha_carga||c.fecha;if(!map[k])map[k]=[];map[k].push(c);});
+  const dias=Object.keys(map).sort();
+
+  // Colores por transportista — fijo y consistente
+  const TRANS_COLORS={
+    'STEF':      {bg:'#EFF6FF',border:'#BFDBFE',text:'#1D4ED8',dot:'#3B82F6'},
+    'CARRERAS':  {bg:'#F0FDF4',border:'#BBF7D0',text:'#15803D',dot:'#22C55E'},
+    'REDUR':     {bg:'#FFF7ED',border:'#FED7AA',text:'#C2410C',dot:'#F97316'},
+    'SCHENKER':  {bg:'#FDF4FF',border:'#E9D5FF',text:'#7E22CE',dot:'#A855F7'},
+    'DSV':       {bg:'#FFFBEB',border:'#FDE68A',text:'#B45309',dot:'#F59E0B'},
+    'RHENUS':    {bg:'#F0FDFA',border:'#99F6E4',text:'#0F766E',dot:'#14B8A6'},
+    'DHL':       {bg:'#FEF2F2',border:'#FECACA',text:'#B91C1C',dot:'#EF4444'},
+    'SUS MEDIOS':{bg:'#F8FAFC',border:'#CBD5E1',text:'#475569',dot:'#94A3B8'},
+  };
+  function tColor(t){ return TRANS_COLORS[t]||{bg:'#F9FAFB',border:'#E5E7EB',text:'#374151',dot:'#9CA3AF'}; }
+
+  // Heading
+  const hEl=document.getElementById('plan-heading');
+  const tEl=document.getElementById('plan-title');
+  const sEl=document.getElementById('plan-sub');
+  if(desde||hasta||tr){
+    hEl.style.display='flex';
+    let titulo='PREVISIÓN DE CARGAS';
+    let sub='';
+    if(tr) titulo += ' — '+tr;
+    if(desde && hasta) sub = fmt(desde)+' al '+fmt(hasta);
+    else if(desde) sub = 'Desde '+fmt(desde);
+    else if(hasta) sub = 'Hasta '+fmt(hasta);
+    if(fil.length) sub += ' · '+fil.length+' carga'+( fil.length>1?'s':'');
+    tEl.textContent=titulo;
+    sEl.textContent=sub;
+  } else { hEl.style.display='none'; }
+
+  const cont=document.getElementById('plan-cont');
+  if(!dias.length){
+    cont.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>Sin cargas en el periodo seleccionado</div>';
+    return;
+  }
+
+  cont.innerHTML=dias.map(dia=>{
+    const listaDia=map[dia];
+    const pal=listaDia.reduce((s,c)=>s+(parseInt(c.palets)||0),0);
+    const pdte=listaDia.filter(c=>c.estado==='Pdte. carga').length;
+    const sp=listaDia.filter(c=>!c.preparador).length;
+    const esH=dia===hoy();
+
+    // Agrupar por transportista manteniendo orden de primera aparición
+    const transOrder=[...new Set(listaDia.map(c=>c.transportista))];
+    const porTrans={};
+    listaDia.forEach(c=>{
+      if(!porTrans[c.transportista]) porTrans[c.transportista]=[];
+      porTrans[c.transportista].push(c);
+    });
+    // Ordenar cada grupo por hora
+    transOrder.forEach(t=>porTrans[t].sort((a,b)=>a.hora.localeCompare(b.hora)));
+
+    const tablaHTML = transOrder.map(t=>{
+      const col=tColor(t);
+      const lista=porTrans[t];
+      const palT=lista.reduce((s,c)=>s+(parseInt(c.palets)||0),0);
+      return `
+        <!-- Separador de transportista -->
+        <tr>
+          <td colspan="13" style="padding:8px 14px;background:${col.bg};border-top:2px solid ${col.border};border-bottom:1px solid ${col.border}">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="width:8px;height:8px;border-radius:50%;background:${col.dot};flex-shrink:0;display:inline-block"></span>
+              <span style="font-size:11px;font-weight:500;color:${col.text};letter-spacing:0.05em">${t}</span>
+              <span style="font-size:11px;color:${col.text};opacity:0.7">${lista.length} carga${lista.length>1?'s':''} · ${palT} pal.</span>
+            </div>
+          </td>
+        </tr>
+        ${lista.map(c=>`<tr style="border-left:3px solid ${col.dot}">
+          <td style="font-weight:500;color:${col.text}">${c.transportista}</td>
+          <td>${c.cliente}</td>
+          <td>${c.albaran}</td>
+          <td style="text-align:center;font-weight:500">${c.palets}</td>
+          <td>${c.cp}</td>
+          <td>${c.localidad}</td>
+          <td>${c.provincia}</td>
+          <td><input class="dinp${!c.fecha_carga?' empty':''}" type="date" value="${c.fecha_carga||''}" onchange="updField('${c.id}','fecha_carga',this.value);this.classList.remove('empty')" title="Modificar fecha de carga"/></td>
+          <td style="color:var(--text2)">${fmt(c.fecha)}</td>
+          <td style="font-weight:500;color:var(--orange)">${c.hora}</td>
+          <td>${tbadge(c.tipo)}</td>
+          <td><select class="ssel" onchange="updField('${c.id}','estado',this.value)">
+            <option${c.estado==='Pdte. carga'?' selected':''}>Pdte. carga</option>
+            <option${c.estado==='Cargado'?' selected':''}>Cargado</option>
+          </select></td>
+          <td><input class="pinp" type="text" value="${c.preparador||''}" placeholder="Sin asignar" onchange="updField('${c.id}','preparador',this.value)"/></td>
+        </tr>`).join('')}`;
+    }).join('');
+
+    return `<div class="day-block" id="db-${dia}">
+      <div class="day-hdr" onclick="tog('${dia}')">
+        <div class="day-hdr-l">
+          <span class="day-name">${dsem(dia)} ${fmt(dia)}</span>
+          <div class="pills">
+            ${esH?`<span class="pill p-t">hoy</span>`:''}
+            <span class="pill p-n">${listaDia.length} carga${listaDia.length>1?'s':''}</span>
+            <span class="pill p-a">${pal} pal.</span>
+            ${pdte?`<span class="pill p-r"><i class="ti ti-clock" style="font-size:10px"></i> ${pdte} pdte.</span>`:''}
+            ${sp?`<span class="pill p-r">${sp} sin asignar</span>`:''}
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              ${transOrder.map(t=>{const col=tColor(t);return`<span style="font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;background:${col.bg};color:${col.text};border:1px solid ${col.border}">${t}</span>`;}).join('')}
+            </div>
+          </div>
+        </div>
+        <i class="ti ti-chevron-down chevron"></i>
+      </div>
+      <div class="day-body">
+        <div style="overflow-x:auto;border-top:1px solid var(--border)">
+        <table style="min-width:1100px">
+          <thead><tr>
+            <th>Transportista</th><th>Cliente</th><th>Albarán</th><th>Pal.</th>
+            <th>CP</th><th>Localidad</th><th>Provincia</th><th>F. carga</th>
+            <th>F. entrega</th><th>Hora</th><th>Tipo</th><th>Estado</th><th>Preparado por</th>
+          </tr></thead>
+          <tbody>${tablaHTML}</tbody>
+        </table>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function tog(d){ document.getElementById('db-'+d).classList.toggle('col'); }
+
+function envMail(){
+  const tr=document.getElementById('pt').value;
+  const desde=document.getElementById('pd').value;
+  const hasta=document.getElementById('ph').value;
+  let fil=D.filter(c=>(!desde||c.fecha_carga>=desde)&&(!hasta||c.fecha_carga<=hasta)&&(!tr||c.transportista===tr))
+           .sort((a,b)=>(a.fecha_carga||'').localeCompare(b.fecha_carga||'')||a.hora.localeCompare(b.hora));
+  if(!fil.length){ toast('No hay cargas para enviar',true); return; }
+  const asunto=tr?`Previsión de cargas — ${tr} — ${fmt(desde)} al ${fmt(hasta)}`:`Previsión de cargas AIN — ${fmt(desde)} al ${fmt(hasta)}`;
+  const map={}; fil.forEach(c=>{const k=c.fecha_carga||c.fecha;if(!map[k])map[k]=[];map[k].push(c);});
+  let body=tr?`Estimado/a ${tr},\n\nPlanificación de cargas asignadas:\n\n`:`Previsión de cargas Aurora Intelligent Nutrition:\n\n`;
+  Object.keys(map).sort().forEach(dia=>{
+    const l=map[dia]; const p=l.reduce((s,c)=>s+(parseInt(c.palets)||0),0);
+    body+=`═══ ${dsem(dia).toUpperCase()} ${fmt(dia)} — ${l.length} carga${l.length>1?'s':''} · ${p} palets ═══\n\n`;
+    l.forEach((c,i)=>{ body+=`${i+1}. Albarán: ${c.albaran}\n   Hora: ${c.hora}  |  Cliente: ${c.cliente}\n   Destino: ${c.localidad} (${c.provincia}) — CP ${c.cp}\n   Tipo: ${c.tipo}  |  Palets: ${c.palets}\n   Empresa: ${c.empresa}\n   Preparado por: ${c.preparador||'(sin asignar)'}\n\n`; });
+  });
+  body+=`Un saludo,\nDpto. Logística · Aurora Intelligent Nutrition`;
+  window.location.href=`mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(body)}`;
+}
+
+// ── HISTORIAL ──────────────────────────────────────────────
+function rHist(){
+  const q=document.getElementById('q').value.toLowerCase();
+  const ft=document.getElementById('ft').value;
+  const fe=document.getElementById('fe').value;
+  const fil=D.filter(c=>{
+    const m=!q||[c.empresa,c.cliente,c.albaran,c.transportista,c.localidad,c.provincia,c.cp,c.preparador].some(v=>String(v||'').toLowerCase().includes(q));
+    return m&&(!ft||c.tipo===ft)&&(!fe||c.estado===fe);
+  });
+  const cont=document.getElementById('hist-cont');
+  if(!fil.length){ cont.innerHTML='<div class="empty"><i class="ti ti-inbox"></i>No hay cargas registradas</div>'; return; }
+  cont.innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr><th>Albarán</th><th>Empresa</th><th>Cliente</th><th>Transportista</th><th>Preparado por</th><th>F. carga</th><th>F. entrega</th><th>Hora</th><th>Localidad</th><th>Provincia</th><th>CP</th><th>Palets</th><th>Tipo</th><th>Estado</th><th></th></tr></thead>
+    <tbody>${fil.map(c=>`<tr>
+      <td style="font-weight:500">${c.albaran}</td>
+      <td>${c.empresa}</td><td>${c.cliente}</td><td>${c.transportista}</td>
+      <td>${c.preparador||`<span style="color:var(--text2);font-style:italic;font-weight:300">—</span>`}</td>
+      <td>${fmt(c.fecha_carga||'')}</td>
+      <td>${fmt(c.fecha)}</td>
+      <td style="font-weight:500;color:var(--orange)">${c.hora}</td>
+      <td>${c.localidad}</td><td>${c.provincia}</td><td>${c.cp}</td>
+      <td style="text-align:center;font-weight:500">${c.palets}</td>
+      <td>${tbadge(c.tipo)}</td>
+      <td><select class="ssel" onchange="updField('${c.id}','estado',this.value)">
+        <option${c.estado==='Pdte. carga'?' selected':''}>Pdte. carga</option>
+        <option${c.estado==='Cargado'?' selected':''}>Cargado</option>
+        <option${c.estado==='Entregado'?' selected':''}>Entregado</option>
+      </select></td>
+      <td><button class="delbtn" onclick="del('${c.id}')" title="Eliminar">×</button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+async function del(id){
+  if(!confirm('¿Eliminar esta carga? Esta acción no se puede deshacer.')) return;
+  try{
+    await sbFetch('cargas?id=eq.'+id,{method:'DELETE',prefer:'return=minimal',headers:{'Prefer':'return=minimal'}});
+    D=D.filter(x=>String(x.id)!==String(id));
+    rHist(); toast('Carga eliminada');
+  }catch(e){ toast('Error al eliminar',true); }
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────
+let dashPeriod = 'semana';
+let dashCharts = {};
+
+function destroyDash(){ Object.values(dashCharts).forEach(c=>{try{c.destroy();}catch(e){}}); dashCharts={}; }
+
+function getPeriodRange(p){
+  const now = new Date();
+  const iso = d => d.toISOString().split('T')[0];
+  const monday = d => { const r=new Date(d); r.setDate(r.getDate()-((r.getDay()+6)%7)); return r; };
+  switch(p){
+    case 'hoy':      return [hoy(), hoy()];
+    case 'ayer':     { const a=new Date(); a.setDate(a.getDate()-1); const s=iso(a); return [s,s]; }
+    case 'semana':   return [iso(monday(now)), hoy()];
+    case 'semana_ant':{ const m=monday(now); m.setDate(m.getDate()-7); const e=new Date(m); e.setDate(e.getDate()+6); return [iso(m),iso(e)]; }
+    case 'mes':      return [iso(new Date(now.getFullYear(),now.getMonth(),1)), hoy()];
+    case 'mes_ant':  { const f=new Date(now.getFullYear(),now.getMonth()-1,1); const l=new Date(now.getFullYear(),now.getMonth(),0); return [iso(f),iso(l)]; }
+    case 'anyo':     return [iso(new Date(now.getFullYear(),0,1)), hoy()];
+    case 'libre':    return [document.getElementById('dash-desde').value||hoy(), document.getElementById('dash-hasta').value||hoy()];
+    default:         return [hoy(), hoy()];
+  }
+}
+
+function setPeriod(p, btn){
+  dashPeriod = p;
+  document.querySelectorAll('.dash-period-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const libre = document.getElementById('dash-range-libre');
+  libre.style.display = p==='libre' ? 'flex' : 'none';
+  rDash();
+}
+
+function iDash(){
+  const ts=[...new Set(D.map(c=>c.transportista))].sort();
+  const sel=document.getElementById('dash-trans-fil'); const cur=sel.value;
+  sel.innerHTML='<option value="">Todos los transportistas</option>'+ts.map(t=>`<option${t===cur?' selected':''}>${t}</option>`).join('');
+  rDash();
+}
+
+function rDash(){
+  const TRANS_COLORS={
+    'STEF':{bg:'#EFF6FF',border:'#BFDBFE',text:'#1D4ED8',dot:'#3B82F6'},
+    'CARRERAS':{bg:'#F0FDF4',border:'#BBF7D0',text:'#15803D',dot:'#22C55E'},
+    'REDUR':{bg:'#FFF7ED',border:'#FED7AA',text:'#C2410C',dot:'#F97316'},
+    'SCHENKER':{bg:'#FDF4FF',border:'#E9D5FF',text:'#7E22CE',dot:'#A855F7'},
+    'DSV':{bg:'#FFFBEB',border:'#FDE68A',text:'#B45309',dot:'#F59E0B'},
+    'RHENUS':{bg:'#F0FDFA',border:'#99F6E4',text:'#0F766E',dot:'#14B8A6'},
+    'DHL':{bg:'#FEF2F2',border:'#FECACA',text:'#B91C1C',dot:'#EF4444'},
+    'SUS MEDIOS':{bg:'#F8FAFC',border:'#CBD5E1',text:'#475569',dot:'#94A3B8'},
+  };
+  function tCol(t){ return TRANS_COLORS[t]||{bg:'#F9FAFB',border:'#E5E7EB',text:'#374151',dot:'#9CA3AF'}; }
+
+  // ── BLOQUE HOY ──────────────────────────────────────────
+  const h = hoy();
+  const hoyD = new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('dash-fecha').textContent = hoyD.charAt(0).toUpperCase()+hoyD.slice(1);
+  document.getElementById('dash-ultima-act').textContent = 'Actualizado '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+
+  const dHoy = D.filter(c=>c.fecha_carga===h);
+  const pdteH = dHoy.filter(c=>c.estado==='Pdte. carga').length;
+  const cargH = dHoy.filter(c=>c.estado==='Cargado').length;
+  const entH  = dHoy.filter(c=>c.estado==='Entregado').length;
+  const palH  = dHoy.reduce((s,c)=>s+(parseInt(c.palets)||0),0);
+  const sinH  = dHoy.filter(c=>!c.preparador).length;
+
+  document.getElementById('dash-kpis-hoy').innerHTML=`
+    <div class="kpi kpi-accent"><div class="kpi-l">Cargas hoy</div><div class="kpi-n" style="color:var(--orange-text)">${dHoy.length}</div><div class="kpi-sub">${palH} palets</div></div>
+    <div class="kpi" style="border-color:#FDE68A;background:#FFFBEB"><div class="kpi-l">Pdte. carga</div><div class="kpi-n" style="color:var(--amber)">${pdteH}</div><div class="kpi-sub">por cargar</div></div>
+    <div class="kpi" style="border-color:#BFDBFE;background:#EFF6FF"><div class="kpi-l">Cargado</div><div class="kpi-n" style="color:var(--blue)">${cargH}</div><div class="kpi-sub">en camino</div></div>
+    <div class="kpi" style="border-color:var(--green-light);background:var(--green-bg)"><div class="kpi-l">Entregado</div><div class="kpi-n" style="color:var(--green)">${entH}</div><div class="kpi-sub">completadas</div></div>
+  `;
+
+  // Tarjetas por transportista hoy
+  const transHoy=[...new Set(dHoy.map(c=>c.transportista))];
+  document.getElementById('dash-trans-hoy').innerHTML = transHoy.length ? transHoy.map(t=>{
+    const col=tCol(t); const tc=dHoy.filter(c=>c.transportista===t);
+    const pal=tc.reduce((s,c)=>s+(parseInt(c.palets)||0),0);
+    return `<div class="dash-trans-card" style="border-color:${col.border};background:${col.bg}">
+      <div class="dash-trans-card-name" style="color:${col.text}"><span style="width:7px;height:7px;border-radius:50%;background:${col.dot};display:inline-block;margin-right:5px"></span>${t}</div>
+      <div class="dash-trans-card-stat" style="color:${col.text}">${tc.length} <span style="font-size:14px;font-weight:400">carga${tc.length>1?'s':''}</span></div>
+      <div class="dash-trans-card-sub">${pal} palets · ${tc.filter(c=>c.estado==='Pdte. carga').length} pdte.</div>
+    </div>`;
+  }).join('') : '<p style="font-size:13px;color:var(--text2)">Sin cargas registradas para hoy</p>';
+
+  // Alertas
+  const alertas=[];
+  if(sinH>0) alertas.push({col:'#FFFBEB',border:'#FDE68A',text:'#92400E',icon:'ti-user-question',msg:`${sinH} carga${sinH>1?'s':''} hoy sin preparador asignado`});
+  const manana=new Date(); manana.setDate(manana.getDate()+1);
+  const mISO=manana.toISOString().split('T')[0];
+  const dMan=D.filter(c=>c.fecha_carga===mISO);
+  if(dMan.length>0) alertas.push({col:'#EFF6FF',border:'#BFDBFE',text:'#1D4ED8',icon:'ti-calendar',msg:`${dMan.length} carga${dMan.length>1?'s':''} planificada${dMan.length>1?'s':''} para mañana`});
+  document.getElementById('dash-alertas').innerHTML = alertas.map(a=>`
+    <div class="dash-alert" style="background:${a.col};border:1px solid ${a.border};color:${a.text}">
+      <i class="ti ${a.icon}" style="font-size:16px;flex-shrink:0"></i>${a.msg}
+    </div>`).join('');
+
+  // ── BLOQUE HISTÓRICO ────────────────────────────────────
+  const tr = document.getElementById('dash-trans-fil').value;
+  const [desde, hasta] = getPeriodRange(dashPeriod);
+  const fil = D.filter(c=>(!desde||c.fecha_carga>=desde)&&(!hasta||c.fecha_carga<=hasta)&&(!tr||c.transportista===tr));
+
+  const tot=fil.length;
+  const palTot=fil.reduce((s,c)=>s+(parseInt(c.palets)||0),0);
+  const entTot=fil.filter(c=>c.estado==='Entregado').length;
+  const pdteTot=fil.filter(c=>c.estado==='Pdte. carga').length;
+  const diasAct=new Set(fil.map(c=>c.fecha_carga)).size;
+
+  document.getElementById('dash-kpis-hist').innerHTML=`
+    <div class="kpi"><div class="kpi-l">Total cargas</div><div class="kpi-n" style="color:var(--orange-text)">${tot}</div><div class="kpi-sub">${diasAct} días activos</div></div>
+    <div class="kpi"><div class="kpi-l">Palets</div><div class="kpi-n" style="color:var(--orange)">${palTot}</div><div class="kpi-sub">media ${tot>0?Math.round(palTot/tot):0}/carga</div></div>
+    <div class="kpi"><div class="kpi-l">Entregadas</div><div class="kpi-n" style="color:var(--green)">${entTot}</div><div class="kpi-sub">${tot>0?Math.round(entTot/tot*100):0}% del total</div></div>
+    <div class="kpi"><div class="kpi-l">Pdte. carga</div><div class="kpi-n" style="color:var(--amber)">${pdteTot}</div><div class="kpi-sub">sin cargar</div></div>
+    <div class="kpi"><div class="kpi-l">Provincias</div><div class="kpi-n" style="color:var(--teal)">${new Set(fil.map(c=>c.provincia)).size}</div><div class="kpi-sub">destinos únicos</div></div>
+  `;
+
+  destroyDash();
+  const gc='rgba(0,0,0,0.05)', tc='#A1A1AA';
+  const ttip={backgroundColor:'#fff',borderColor:'#E4E4E7',borderWidth:1,titleColor:'#0F0F10',bodyColor:'#6B6B72'};
+
+  // Gráfica evolución
+  const dias=[...new Set(fil.map(c=>c.fecha_carga))].sort();
+  const dL=dias.map(d=>{const[,m,dd]=d.split('-');return`${dd}/${m}`;});
+  dashCharts.evol=new Chart(document.getElementById('dash-c-evol'),{
+    type:'bar',
+    data:{labels:dL,datasets:[
+      {label:'Cargas',data:dias.map(d=>fil.filter(c=>c.fecha_carga===d).length),backgroundColor:'#E8793A',borderRadius:4,order:1},
+      {label:'Palets',data:dias.map(d=>fil.filter(c=>c.fecha_carga===d).reduce((s,c)=>s+(parseInt(c.palets)||0),0)),backgroundColor:'#F9C8A4',borderRadius:4,yAxisID:'y2',order:2}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:ttip},
+      scales:{x:{grid:{color:gc},ticks:{font:{size:10},color:tc,autoSkip:true,maxTicksLimit:14}},
+        y:{grid:{color:gc},ticks:{font:{size:10},color:tc},title:{display:true,text:'Cargas',font:{size:10},color:tc}},
+        y2:{position:'right',grid:{display:false},ticks:{font:{size:10},color:tc},title:{display:true,text:'Palets',font:{size:10},color:tc}}}}
+  });
+
+  // Ranking transportistas
+  const TRANS=TRANSPORTISTAS.filter(t=>fil.some(c=>c.transportista===t));
+  const transData=TRANS.map(t=>{
+    const tc2=fil.filter(c=>c.transportista===t);
+    const col=tCol(t);
+    return{name:t,cargas:tc2.length,palets:tc2.reduce((s,c)=>s+(parseInt(c.palets)||0),0),col};
+  }).filter(t=>t.cargas>0).sort((a,b)=>b.cargas-a.cargas);
+  const maxC=Math.max(...transData.map(t=>t.cargas),1);
+  document.getElementById('dash-rank-trans').innerHTML=transData.map(t=>`
+    <div class="rank-row">
+      <div class="rank-name" title="${t.name}" style="color:${t.col.text}">${t.name}</div>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${Math.round(t.cargas/maxC*100)}%;background:${t.col.dot}"></div></div>
+      <div class="rank-val">${t.cargas}</div>
+      <div class="rank-badge" style="background:${t.col.bg};color:${t.col.text};border:1px solid ${t.col.border}">${t.palets} pal.</div>
+    </div>`).join('') || '<p style="font-size:13px;color:var(--text2)">Sin datos</p>';
+
+  // Donut estados
+  const entN=fil.filter(c=>c.estado==='Entregado').length;
+  const cargN=fil.filter(c=>c.estado==='Cargado').length;
+  const pdteN=fil.filter(c=>c.estado==='Pdte. carga').length;
+  const etot=Math.max(entN+cargN+pdteN,1);
+  document.getElementById('dash-estado-legend').innerHTML=`
+    <span class="cleg"><span class="cleg-sq" style="background:#15803D"></span>Entregado ${Math.round(entN/etot*100)}%</span>
+    <span class="cleg"><span class="cleg-sq" style="background:#1D4ED8"></span>Cargado ${Math.round(cargN/etot*100)}%</span>
+    <span class="cleg"><span class="cleg-sq" style="background:#E8793A"></span>Pdte. ${Math.round(pdteN/etot*100)}%</span>`;
+  dashCharts.estado=new Chart(document.getElementById('dash-c-estado'),{
+    type:'doughnut',
+    data:{labels:['Entregado','Cargado','Pdte. carga'],datasets:[{data:[entN,cargN,pdteN],backgroundColor:['#15803D','#1D4ED8','#E8793A'],borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{display:false},tooltip:ttip}}
+  });
+
+  // Donut tipos
+  const tC=[fil.filter(c=>c.tipo==='Estándar').length,fil.filter(c=>c.tipo==='Refrigerada').length,fil.filter(c=>c.tipo==='Pharma').length];
+  const tcols=['#E8793A','#0F766E','#1D4ED8'];
+  const tnames=['Estándar','Refrigerada','Pharma'];
+  document.getElementById('dash-tipo-legend').innerHTML=tnames.map((n,i)=>`
+    <span class="cleg"><span class="cleg-sq" style="background:${tcols[i]}"></span>${n} ${Math.round(tC[i]/Math.max(tot,1)*100)}%</span>`).join('');
+  dashCharts.tipo=new Chart(document.getElementById('dash-c-tipo'),{
+    type:'doughnut',
+    data:{labels:tnames,datasets:[{data:tC,backgroundColor:tcols,borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{display:false},tooltip:ttip}}
+  });
+
+  // Ranking provincias
+  const PROVS=[...new Set(D.map(c=>c.provincia))];
+  const provData=PROVS.map(p=>({name:p,n:fil.filter(c=>c.provincia===p).length})).filter(p=>p.n>0).sort((a,b)=>b.n-a.n).slice(0,8);
+  const maxP=Math.max(...provData.map(p=>p.n),1);
+  document.getElementById('dash-rank-prov').innerHTML=provData.map(p=>`
+    <div class="rank-row">
+      <div class="rank-name">${p.name}</div>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${Math.round(p.n/maxP*100)}%;background:#0F766E"></div></div>
+      <div class="rank-val">${p.n}</div>
+      <div class="rank-badge" style="background:var(--teal-bg);color:var(--teal)">${Math.round(p.n/Math.max(tot,1)*100)}%</div>
+    </div>`).join('') || '<p style="font-size:13px;color:var(--text2)">Sin datos</p>';
+}
+
+// ── RESUMEN ────────────────────────────────────────────────
+function rRes(){
+  const tot=D.length;
+  const ent=D.filter(c=>c.estado==='Entregado').length;
+  const pdte=D.filter(c=>c.estado==='Pdte. carga').length;
+  const pal=D.reduce((s,c)=>s+(parseInt(c.palets)||0),0);
+  document.getElementById('res-kpis').innerHTML=`
+    <div class="kpi kpi-accent"><div class="kpi-l">Total cargas</div><div class="kpi-n" style="color:var(--orange-text)">${tot}</div></div>
+    <div class="kpi"><div class="kpi-l">Entregadas</div><div class="kpi-n" style="color:var(--green)">${ent}</div></div>
+    <div class="kpi"><div class="kpi-l">Pdte. carga</div><div class="kpi-n" style="color:var(--amber)">${pdte}</div></div>
+    <div class="kpi"><div class="kpi-l">Palets totales</div><div class="kpi-n" style="color:var(--orange)">${pal}</div></div>
+  `;
+  const tipos={Estándar:0,Refrigerada:0,Pharma:0};
+  D.forEach(c=>tipos[c.tipo]=(tipos[c.tipo]||0)+1);
+  const bw=t=>tot>0?Math.round(tipos[t]/tot*100):0;
+  const prov={};D.forEach(c=>{if(c.provincia)prov[c.provincia]=(prov[c.provincia]||0)+1;});
+  const tp=Object.entries(prov).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const prep={};D.forEach(c=>{if(c.preparador)prep[c.preparador]=(prep[c.preparador]||0)+1;});
+  const tpr=Object.entries(prep).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById('res-det').innerHTML=`
+    <div class="res-sec">
+      <div class="res-sec-title">Por tipo de carga</div>
+      ${['Estándar','Refrigerada','Pharma'].map(t=>`
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">${tbadge(t)}<span style="font-size:12px;color:var(--text2)">${tipos[t]||0} cargas</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${bw(t)}%;background:${t==='Estándar'?'#E8793A':t==='Refrigerada'?'#0F766E':'#1D4ED8'}"></div></div>
+        </div>`).join('')}
+    </div>
+    <div>
+      <div class="res-sec" style="margin-bottom:14px">
+        <div class="res-sec-title">Top provincias</div>
+        ${tp.length?tp.map(([p,n],i)=>`
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:${i<tp.length-1?'1px solid var(--border)':'none'}">
+            <span style="font-size:13px">${p}</span>
+            <span style="font-size:12px;color:var(--orange);font-weight:500">${n}</span>
+          </div>`).join(''):`<p style="font-size:13px;color:var(--text2)">Sin datos</p>`}
+      </div>
+      <div class="res-sec">
+        <div class="res-sec-title">Por preparador</div>
+        ${tpr.length?tpr.map(([p,n],i)=>`
+          <div style="padding:7px 0;border-bottom:${i<tpr.length-1?'1px solid var(--border)':'none'}">
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+              <span style="font-size:13px">${p}</span><span style="font-size:12px;color:var(--text2)">${n}</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/tot*100)}%;background:#E8793A"></div></div>
+          </div>`).join(''):`<p style="font-size:13px;color:var(--text2)">Sin datos</p>`}
+      </div>
+    </div>
+  `;
+}
+
+// ── CSV ────────────────────────────────────────────────────
+function xcsv(){
+  if(!D.length){ toast('No hay datos para exportar',true); return; }
+  const h=['Albarán','Empresa','Transportista','Cliente','Preparado por','Fecha carga','Fecha entrega','Hora','Localidad','Provincia','CP','Palets','Tipo','Estado'];
+  const rows=D.map(c=>[c.albaran,c.empresa,c.transportista,c.cliente,c.preparador||'',c.fecha_carga||'',c.fecha,c.hora,c.localidad,c.provincia,c.cp,c.palets,c.tipo,c.estado].join(','));
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent([h.join(','),...rows].join('\n'));
+  a.download='AIN_cargas_'+hoy()+'.csv'; a.click();
+  toast('CSV exportado');
+}
+
+// ── MAESTROS (ampliar aquí en el futuro) ───────────────────
+const EMPRESAS = ['MORENO','DMI','NUTRIEXPERIENCE'];
+const TRANSPORTISTAS = ['STEF','CARRERAS','REDUR','SCHENKER','DSV','RHENUS','DHL','SUS MEDIOS'];
+
+// ── BÚSQUEDA AUTOMÁTICA POR CÓDIGO POSTAL ─────────────────
+let cpTimer = null;
+async function buscarCP(cp){
+  cp = cp.trim();
+  document.getElementById('cp').value = cp;
+  if(cp.length !== 5 || !/^\d{5}$/.test(cp)) return;
+  clearTimeout(cpTimer);
+  cpTimer = setTimeout(async () => {
+    const sp = document.getElementById('loc-spinner');
+    sp.style.display = 'inline';
+    try{
+      const res = await fetch(`https://api.zippopotam.us/es/${cp}`);
+      if(!res.ok){ sp.style.display='none'; return; }
+      const data = await res.json();
+      if(data.places && data.places.length > 0){
+        document.getElementById('localidad').value = data.places[0]['place name'].toUpperCase();
+        document.getElementById('provincia').value = data.places[0]['state'].toUpperCase();
+      }
+    }catch(e){ /* silencioso si falla la API */ }
+    sp.style.display = 'none';
+  }, 600);
+}
+
+// ── TOAST ──────────────────────────────────────────────────
+function toast(msg, err){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+(err?'err':'ok');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
